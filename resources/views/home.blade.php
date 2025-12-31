@@ -177,109 +177,131 @@
         </div>
     </section>
 
-    <!-- Rooms Section dengan Grid Rapi -->
-    <section id="rooms" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <!-- Section Header -->
-            <div class="text-center mb-12">
-                <span class="inline-block bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
-                    PREMIUM SPACES
-                </span>
-                <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Our Facilities</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">
-                    Pilih dari koleksi ruangan kreatif kami yang dirancang khusus
-                </p>
-            </div>
-            
-            <!-- Rooms Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($rooms as $room)
-                <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
-                    <!-- Room Header -->
-<div class="h-48 relative overflow-hidden">
-    <!-- Background Image -->
-    <div class="absolute inset-0">
-        @if(file_exists(storage_path('app/public/rooms/' . $room->image)))
-            <img 
-                src="{{ asset('storage/rooms/' . $room->image) }}" 
-                alt="{{ $room->name }}"
-                class="w-full h-full object-cover"
-            >
-        @else
-            <!-- Fallback jika gambar tidak ditemukan -->
-            <div class="w-full h-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center">
-                <i class="fas fa-building text-white/20 text-6xl"></i>
-            </div>
-        @endif
+<!-- Rooms Section dengan Grid Rapi -->
+<section id="rooms" class="py-16 bg-white">
+    <div class="container mx-auto px-4">
+        <!-- Section Header -->
+        <div class="text-center mb-12">
+            <span class="inline-block bg-red-100 text-red-700 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                PREMIUM SPACES
+            </span>
+            <h2 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">Our Facilities</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">
+                Pilih dari koleksi ruangan kreatif kami yang dirancang khusus
+            </p>
+        </div>
         
-        <!-- Overlay Gradient -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
-    </div>
-    
-    <!-- Capacity Badge -->
-    <div class="absolute top-4 right-4 bg-white/90 px-3 py-1.5 rounded-full z-10">
-        <span class="text-red-700 font-semibold text-sm flex items-center">
-            <i class="fas fa-users mr-1.5"></i>{{ $room->capacity }} People
-        </span>
-    </div>
-    
-    <!-- Free Badge -->
-    <div class="absolute bottom-4 left-4 z-10">
-        <span class="bg-white text-red-700 font-semibold px-3 py-1.5 rounded-full text-sm shadow-sm">
-            <i class="fas fa-gift mr-1.5"></i>FREE
-        </span>
-    </div>
-</div>
-                    
-                    <!-- Room Content -->
-                    <div class="p-6">
-                        <!-- Title & Rating -->
-                        <div class="flex justify-between items-start mb-4">
-                            <h3 class="text-xl font-semibold text-gray-900">{{ $room->name }}</h3>
-                            <div class="flex items-center">
-                                <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
-                                <span class="text-gray-600 text-sm">4.8</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Description -->
-                        <p class="text-gray-600 mb-4 line-clamp-2">
-                            {{ Str::limit($room->description, 100) }}
-                        </p>
-                        
-                        <!-- Facilities -->
-                        <div class="mb-6">
-                            <div class="flex items-center text-gray-700 mb-2">
-                                <i class="fas fa-wifi text-red-500 mr-3"></i>
-                                <span class="text-sm">{{ Str::limit($room->facilities, 50) }}</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="{{ route('room.detail', $room->slug) }}" 
-                               class="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 text-center">
-                                <i class="fas fa-eye mr-2"></i>Details
-                            </a>
+        <!-- Rooms Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach($rooms as $room)
+            <div class="bg-white rounded-xl border border-gray-200 hover:shadow-lg transition-all duration-200 overflow-hidden">
+                <!-- Room Header -->
+                <div class="h-48 relative overflow-hidden">
+                    <!-- Background Image -->
+                    <div class="absolute inset-0">
+                        @php
+                            // Debug info - bisa dihapus setelah fix
+                            $imageExists = false;
+                            $imagePath = null;
+                            $imageUrl = null;
                             
-                            @auth
-                                <a href="{{ route('booking.create', $room->slug) }}" 
-                                   class="bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 text-center">
-                                    <i class="fas fa-calendar-plus mr-2"></i>Book Now
-                                </a>
-                            @else
-                                <a href="{{ route('login') }}" 
-                                   class="bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 text-center">
-                                    <i class="fas fa-calendar-plus mr-2"></i>Book Now
-                                </a>
-                            @endauth
-                        </div>
+                            if ($room->image) {
+                                // Cek apakah ada di storage
+                                if (Storage::disk('public')->exists($room->image)) {
+                                    $imageExists = true;
+                                    $imagePath = $room->image;
+                                    $imageUrl = Storage::url($room->image);
+                                } 
+                                // Fallback untuk image lama yang ada di public/images/rooms
+                                elseif (file_exists(public_path('images/rooms/' . $room->image))) {
+                                    $imageExists = true;
+                                    $imagePath = 'images/rooms/' . $room->image;
+                                    $imageUrl = asset('images/rooms/' . $room->image);
+                                }
+                            }
+                        @endphp
+                        
+                        @if($imageExists)
+                            <img 
+                                src="{{ $imageUrl }}" 
+                                alt="{{ $room->name }}"
+                                class="w-full h-full object-cover"
+                            >
+                        @else
+                            <!-- Fallback jika gambar tidak ditemukan -->
+                            <div class="w-full h-full bg-gradient-to-r from-red-500 to-red-600 flex items-center justify-center">
+                                <i class="fas fa-building text-white/20 text-6xl"></i>
+                            </div>
+                        @endif
+                        
+                        <!-- Overlay Gradient -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent"></div>
+                    </div>
+                    
+                    <!-- Capacity Badge -->
+                    <div class="absolute top-4 right-4 bg-white/90 px-3 py-1.5 rounded-full z-10">
+                        <span class="text-red-700 font-semibold text-sm flex items-center">
+                            <i class="fas fa-users mr-1.5"></i>{{ $room->capacity }} People
+                        </span>
+                    </div>
+                    
+                    <!-- Free Badge -->
+                    <div class="absolute bottom-4 left-4 z-10">
+                        <span class="bg-white text-red-700 font-semibold px-3 py-1.5 rounded-full text-sm shadow-sm">
+                            <i class="fas fa-gift mr-1.5"></i>FREE
+                        </span>
                     </div>
                 </div>
-                @endforeach
+                
+                <!-- Room Content -->
+                <div class="p-6">
+                    <!-- Title & Rating -->
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900">{{ $room->name }}</h3>
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-400 text-sm mr-1"></i>
+                            <span class="text-gray-600 text-sm">4.8</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <p class="text-gray-600 mb-4 line-clamp-2">
+                        {{ Str::limit($room->description, 100) }}
+                    </p>
+                    
+                    <!-- Facilities -->
+                    <div class="mb-6">
+                        <div class="flex items-center text-gray-700 mb-2">
+                            <i class="fas fa-wifi text-red-500 mr-3"></i>
+                            <span class="text-sm">{{ Str::limit($room->facilities, 50) }}</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <a href="{{ route('room.detail', $room->slug) }}" 
+                           class="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg font-medium hover:bg-gray-200 transition-colors duration-200 text-center">
+                            <i class="fas fa-eye mr-2"></i>Details
+                        </a>
+                        
+                        @auth
+                            <a href="{{ route('booking.create', $room->slug) }}" 
+                               class="bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 text-center">
+                                <i class="fas fa-calendar-plus mr-2"></i>Book Now
+                            </a>
+                        @else
+                            <a href="{{ route('login') }}" 
+                               class="bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium hover:bg-red-700 transition-colors duration-200 text-center">
+                                <i class="fas fa-calendar-plus mr-2"></i>Book Now
+                            </a>
+                        @endauth
+                    </div>
+                </div>
             </div>
+            @endforeach
         </div>
-    </section>
+    </div>
+</section>
 
     <!-- Process Section dengan Grid Rapi -->
     <section class="py-16 bg-gray-50">

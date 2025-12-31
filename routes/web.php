@@ -44,8 +44,14 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::post('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.update-status');
+    
+    // Room Management Routes - TAMBAHKAN INI
     Route::get('/rooms', [AdminController::class, 'rooms'])->name('rooms');
+    Route::get('/rooms/create', [AdminController::class, 'createRoom'])->name('rooms.create');
+    Route::post('/rooms', [AdminController::class, 'storeRoom'])->name('rooms.store');
     Route::get('/rooms/{room}/edit', [AdminController::class, 'editRoom'])->name('rooms.edit');
     Route::match(['put', 'patch'], '/rooms/{room}', [AdminController::class, 'updateRoom'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [AdminController::class, 'destroyRoom'])->name('rooms.destroy');
+    
     Route::get('/export-bookings', [AdminController::class, 'exportBookings'])->name('export.bookings');
 });
