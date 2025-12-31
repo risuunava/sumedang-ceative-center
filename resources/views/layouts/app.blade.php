@@ -324,18 +324,29 @@
                         
                         @auth
                             <a href="{{ route('booking.index') }}" 
-                               class="nav-link group px-5 py-2.5 rounded-xl relative overflow-hidden {{ request()->routeIs('booking.*') ? 'active bg-gradient-to-br from-white to-gray-50 shadow-md ring-1 ring-gray-200/50' : '' }}">
+                            class="nav-link group px-5 py-2.5 rounded-xl relative overflow-hidden {{ request()->routeIs('booking.*') ? 'active bg-gradient-to-br from-white to-gray-50 shadow-md ring-1 ring-gray-200/50' : '' }}">
                                 <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                                 <i class="fas fa-calendar-day mr-2.5 text-sm relative z-10 {{ request()->routeIs('booking.*') ? 'text-red-600' : 'text-gray-500' }}"></i>
                                 <span class="font-medium relative z-10">Bookings</span>
                                 <div class="nav-underline"></div>
                             </a>
+
+                            @if (auth()->user()->is_admin)
+                                <!-- Icon untuk Rooms -->
+                                <a href="{{ route('admin.rooms') }}" 
+                                class="nav-link group px-5 py-2.5 rounded-xl relative overflow-hidden {{ request()->routeIs('admin.rooms') ? 'active bg-gradient-to-br from-white to-gray-50 shadow-md ring-1 ring-gray-200/50' : '' }}">
+                                    <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                                    <i class="fas fa-door-open mr-2.5 text-sm relative z-10 {{ request()->routeIs('admin.rooms') ? 'text-red-600' : 'text-gray-500' }}"></i>
+                                    <span class="font-medium relative z-10">Rooms</span>
+                                    <div class="nav-underline"></div>
+                                </a>
+                            @endif
                             
                             @if(auth()->user()->is_admin)
                                 <a href="{{ route('admin.dashboard') }}" 
-                                   class="nav-link group px-5 py-2.5 rounded-xl relative overflow-hidden {{ request()->is('admin*') ? 'active bg-gradient-to-br from-white to-gray-50 shadow-md ring-1 ring-gray-200/50' : '' }}">
+                                class="nav-link group px-5 py-2.5 rounded-xl relative overflow-hidden {{ request()->is('admin*') && !request()->routeIs('admin.rooms') ? 'active bg-gradient-to-br from-white to-gray-50 shadow-md ring-1 ring-gray-200/50' : '' }}">
                                     <div class="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 transform -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                                    <i class="fas fa-shield mr-2.5 text-sm relative z-10 {{ request()->is('admin*') ? 'text-red-600' : 'text-gray-500' }}"></i>
+                                    <i class="fas fa-shield mr-2.5 text-sm relative z-10 {{ request()->is('admin*') && !request()->routeIs('admin.rooms') ? 'text-red-600' : 'text-gray-500' }}"></i>
                                     <span class="font-medium relative z-10">Admin</span>
                                     <div class="nav-underline"></div>
                                 </a>
@@ -511,6 +522,14 @@
                 </a>
                 
                 @auth
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('admin.rooms') }}" 
+                        class="mobile-menu-item {{ request()->is('admin.rooms') ? 'active' : '' }}">
+                            <i class="fas fa-door-open mr-3 text-gray-400"></i>
+                            Rooms
+                        </a>
+                    @endif
+
                     @if(auth()->user()->is_admin)
                     <a href="{{ route('admin.dashboard') }}" 
                        class="mobile-menu-item {{ request()->is('admin*') ? 'active' : '' }}">
