@@ -4,11 +4,13 @@
 
 @section('content')
     <!-- Hero Section dengan Grid Rapi -->
-    <section class="relative bg-gradient-to-br from-gray-900 via-gray-800 to-red-900 overflow-hidden">
-        <div class="container mx-auto px-4 py-16 lg:py-24">
+<section class="relative bg-gradient-to-br from-gray-900 via-gray-800 to-red-900 overflow-hidden -mt-6 pb-16 lg:-mt-10">
+    <div class="container mx-auto px-4 pt-6 pb-16 lg:pt-10 lg:pb-24">
+
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <!-- Left Column - Content -->
-                <div class="relative z-10 ml-6">
+               <div class="relative z-10 ml-0 lg:ml-6">
+
                     <!-- Badge -->
                     <div class="inline-flex items-center bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-8 border border-white/20">
                         <div class="w-2 h-2 bg-red-400 rounded-full mr-2"></div>
@@ -60,9 +62,7 @@
                             <div class="text-white/70 text-sm">Rating</div>
                         </div>
                     </div>
-                </div>
-                
-                
+                </div>  
             </div>
         </div>
     </section>
