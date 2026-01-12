@@ -7,11 +7,13 @@ use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
     public function index()
     {
+        // PERBAIKAN: Gunakan paginate() bukan get()
         $bookings = Auth::user()->bookings()->with('room')->latest()->paginate(10);
         return view('booking.index', compact('bookings'));
     }
@@ -37,12 +39,19 @@ class BookingController extends Controller
             return back()->withErrors(['end_time' => 'Waktu selesai harus setelah waktu mulai.']);
         }
 
-        // Hitung durasi
+        // Hitung durasi dengan strtotime (paling sederhana dan pasti bekerja)
         $start = strtotime($request->start_time);
         $end = strtotime($request->end_time);
-        $totalHours = ($end - $start) / 3600;
+        $totalHours = ($end - $start) / 3600; // 3600 detik = 1 jam
 
-        // Validasi durasi minimal 2 jam
+        // Debug info (opsional)
+        // \Log::info('Booking calculation', [
+        //     'start' => $request->start_time,
+        //     'end' => $request->end_time,
+        //     'total_hours' => $totalHours
+        // ]);
+
+        // Validasi durasi minimal 2 jam (dengan toleransi kecil)
         if ($totalHours < 1.99) {
             return back()->withErrors([
                 'end_time' => 'Durasi minimal booking adalah 2 jam. Anda memilih ' . 
@@ -73,7 +82,7 @@ class BookingController extends Controller
             ]);
         }
 
-        // Buat booking - GRATIS
+        // Buat booking
         $booking = Booking::create([
             'user_id' => Auth::id(),
             'room_id' => $request->room_id,
@@ -82,6 +91,7 @@ class BookingController extends Controller
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
             'total_hours' => round($totalHours, 2),
+            'total_price' => round($totalHours * $room->price_per_hour, 2),
             'purpose' => $request->purpose,
             'status' => 'pending',
         ]);

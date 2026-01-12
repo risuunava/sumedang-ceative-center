@@ -17,7 +17,7 @@ class Booking extends Model
         'start_time',
         'end_time',
         'total_hours',
-        // HAPUS: 'total_price',
+        'total_price',
         'purpose',
         'status',
         'admin_notes',
@@ -56,5 +56,8 @@ class Booking extends Model
         return $badges[$this->status] ?? 'bg-gray-100 text-gray-800';
     }
 
-    // HAPUS method getFormattedTotalPriceAttribute()
+    public function getFormattedTotalPriceAttribute()
+    {
+        return 'Rp ' . number_format($this->total_price, 0, ',', '.');
+    }
 }
