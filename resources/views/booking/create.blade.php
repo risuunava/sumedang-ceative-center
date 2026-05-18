@@ -60,10 +60,7 @@
                                 <span class="text-gray-600">Kapasitas</span>
                                 <span class="font-medium">{{ $room->capacity }} orang</span>
                             </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Harga per jam</span>
-                                <span class="font-medium">Rp {{ number_format($room->price_per_hour, 0, ',', '.') }}</span>
-                            </div>
+                            
                         </div>
                     </div>
                     
@@ -288,7 +285,8 @@
 
 @section('scripts')
 <script>
-const pricePerHour = {{ $room->price_per_hour }};
+// HAPUS baris ini - tidak diperlukan lagi
+// const pricePerHour = {{ $room->price_per_hour }};
 
 function calculateDuration() {
     const startTime = document.getElementById('start_time').value;
@@ -312,24 +310,28 @@ function calculateDuration() {
         
         if (diffHours >= 1.99) { // 1.99 untuk toleransi floating point
             document.getElementById('duration_hours').textContent = diffHours.toFixed(2);
-            document.getElementById('total_price').textContent = 'Rp ' + (diffHours * pricePerHour).toLocaleString('id-ID');
-            durationDiv.classList.remove('hidden');
+            // HAPUS baris berikut karena tidak ada harga per jam lagi
+            // document.getElementById('total_price').textContent = 'Rp ' + (diffHours * pricePerHour).toLocaleString('id-ID');
             
-            // Tampilkan status durasi
-            if (diffHours >= 2) {
-                durationStatus.innerHTML = `
-                    <span class="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
-                        <i class="fas fa-check-circle mr-1"></i> Sesuai
-                    </span>
-                `;
-                
-                // Update warna berdasarkan durasi
-                if (Math.abs(diffHours - 2) < 0.01) {
-                    document.getElementById('duration_info').className = 'bg-green-50 border border-green-200 rounded-lg p-4';
-                } else {
-                    document.getElementById('duration_info').className = 'bg-blue-50 border border-blue-200 rounded-lg p-4';
-                }
+            // Update status durasi dengan warna yang sesuai
+            let statusText, statusClass, boxClass;
+            
+            if (Math.abs(diffHours - 2) < 0.01) {
+                // Tepat 2 jam
+                statusText = '<i class="fas fa-check-circle mr-1"></i> Sesuai';
+                statusClass = 'px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded';
+                boxClass = 'bg-green-50 border border-green-200 rounded-lg p-4';
+            } else {
+                // Lebih dari 2 jam
+                statusText = '<i class="fas fa-clock mr-1"></i> ' + diffHours.toFixed(2) + ' jam';
+                statusClass = 'px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded';
+                boxClass = 'bg-blue-50 border border-blue-200 rounded-lg p-4';
             }
+            
+            durationDiv.className = boxClass;
+            durationDiv.classList.remove('hidden');
+            durationStatus.innerHTML = `<span class="${statusClass}">${statusText}</span>`;
+            
         } else {
             durationDiv.classList.add('hidden');
             if (diffHours > 0) {
@@ -346,7 +348,7 @@ function calculateDuration() {
     }
 }
 
-// PERBAIKAN: Generate end time options yang valid
+// Generate end time options yang valid
 document.getElementById('start_time').addEventListener('change', function() {
     const endSelect = document.getElementById('end_time');
     const startTime = this.value;
@@ -424,7 +426,7 @@ document.getElementById('bookingForm').addEventListener('submit', function(e) {
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Memproses...';
         submitBtn.disabled = true;
         
-        // Re-enable after 3 seconds if form doesn't submit
+        // Re-enable after 3 seconds jika form tidak submit
         setTimeout(() => {
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;

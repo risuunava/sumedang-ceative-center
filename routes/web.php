@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ProfileController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -24,6 +25,13 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Authenticated user routes
 Route::middleware('auth')->group(function () {
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+    
+    // Booking routes
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('booking.index');
     Route::get('/room/{slug}/booking', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
@@ -31,13 +39,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/booking/{booking}/cancel', [BookingController::class, 'cancel'])->name('booking.cancel');
 });
 
-// Admin routes - TANPA MIDDLEWARE GLOBAL, hanya auth
+// Admin routes
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/bookings', [AdminController::class, 'bookings'])->name('bookings');
     Route::post('/bookings/{booking}/status', [AdminController::class, 'updateBookingStatus'])->name('bookings.update-status');
+    
+    // Room Management Routes - TAMBAHKAN INI
     Route::get('/rooms', [AdminController::class, 'rooms'])->name('rooms');
+    Route::get('/rooms/create', [AdminController::class, 'createRoom'])->name('rooms.create');
+    Route::post('/rooms', [AdminController::class, 'storeRoom'])->name('rooms.store');
     Route::get('/rooms/{room}/edit', [AdminController::class, 'editRoom'])->name('rooms.edit');
     Route::match(['put', 'patch'], '/rooms/{room}', [AdminController::class, 'updateRoom'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [AdminController::class, 'destroyRoom'])->name('rooms.destroy');
+    
     Route::get('/export-bookings', [AdminController::class, 'exportBookings'])->name('export.bookings');
 });

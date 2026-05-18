@@ -91,6 +91,16 @@ php artisan serve
 
 Aplikasi sekarang dapat diakses melalui browser pada `http://127.0.0.1:8000`.
 
+---
+
+## 👥 Akun Default (Seeder)
+
+Setelah Anda menjalankan `php artisan db:seed`, sistem akan membuat beberapa akun default untuk keperluan *testing*:
+
+| Role | Email | Password |
+|------|-------|----------|
+| **Admin** | admin@scc.com | `password` |
+| **User** | user@scc.com | `password` |
 
 ---
 

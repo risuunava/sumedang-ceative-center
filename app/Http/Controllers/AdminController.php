@@ -7,7 +7,8 @@ use App\Models\Room;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage; // TAMBAHKAN INI
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -95,6 +96,46 @@ class AdminController extends Controller
         return view('admin.rooms.index', compact('rooms'));
     }
 
+    public function createRoom()
+    {
+        $this->checkAdmin();
+        
+        return view('admin.rooms.create');
+    }
+
+    public function storeRoom(Request $request)
+    {
+        $this->checkAdmin();
+        
+        $request->validate([
+            'name' => 'required|string|max:255|unique:rooms',
+            'description' => 'required|string',
+            'capacity' => 'required|integer|min:1',
+            'facilities' => 'required|string',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'is_active' => 'boolean',
+        ]);
+
+        $data = $request->except('image');
+
+        // Handle image upload - SIMPAN DI STORAGE
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            
+            // Generate nama file yang unik
+            $imageName = time() . '_' . Str::slug($request->name) . '.' . $image->getClientOriginalExtension();
+            
+            // Simpan di storage/app/public/rooms
+            $imagePath = $image->storeAs('rooms', $imageName, 'public');
+            
+            $data['image'] = $imagePath; // Simpan path relatif
+        }
+
+        Room::create($data);
+
+        return redirect()->route('admin.rooms')->with('success', 'Ruangan berhasil ditambahkan.');
+    }
+
     public function editRoom(Room $room)
     {
         $this->checkAdmin();
@@ -107,17 +148,57 @@ class AdminController extends Controller
         $this->checkAdmin();
         
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:255|unique:rooms,name,' . $room->id,
             'description' => 'required|string',
             'capacity' => 'required|integer|min:1',
             'facilities' => 'required|string',
-            'price_per_hour' => 'required|numeric|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'is_active' => 'boolean',
         ]);
 
-        $room->update($request->all());
+        $data = $request->except('image', 'remove_image');
 
-        return redirect()->route('admin.rooms')->with('success', 'Ruangan berhasil diupdate.');
+        // Handle image removal
+        if ($request->has('remove_image') && $request->remove_image == 1) {
+            // Delete old image from storage if exists
+            if ($room->image && Storage::disk('public')->exists($room->image)) {
+                Storage::disk('public')->delete($room->image);
+            }
+            $data['image'] = null;
+        }
+
+        // Handle new image upload
+        if ($request->hasFile('image')) {
+            // Delete old image from storage if exists
+            if ($room->image && Storage::disk('public')->exists($room->image)) {
+                Storage::disk('public')->delete($room->image);
+            }
+            
+            $image = $request->file('image');
+            $imageName = time() . '_' . Str::slug($request->name) . '.' . $image->getClientOriginalExtension();
+            
+            // Simpan di storage/app/public/rooms
+            $imagePath = $image->storeAs('rooms', $imageName, 'public');
+            $data['image'] = $imagePath;
+        }
+
+        $room->update($data);
+
+        return redirect()->route('admin.rooms')->with('success', 'Ruangan berhasil diperbarui.');
+    }
+
+    public function destroyRoom(Room $room)
+    {
+        $this->checkAdmin();
+        
+        // Delete room image from storage if exists
+        if ($room->image && Storage::disk('public')->exists($room->image)) {
+            Storage::disk('public')->delete($room->image);
+        }
+
+        $room->delete();
+
+        return redirect()->route('admin.rooms')->with('success', 'Ruangan berhasil dihapus.');
     }
 
     public function exportBookings(Request $request)
@@ -189,7 +270,7 @@ class AdminController extends Controller
                     $booking->start_time,
                     $booking->end_time,
                     $booking->total_hours,
-                    'Rp ' . number_format($booking->total_price, 0, ',', '.'),
+                    'GRATIS',
                     $booking->purpose,
                     $this->getStatusText($booking->status),
                     $booking->admin_notes ?? '-',
